@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  autopdf:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - GLPI_URL=${GLPI_URL}
+      - GLPI_APP_TOKEN=${GLPI_APP_TOKEN}
+      - GLPI_USER_TOKEN=${GLPI_USER_TOKEN}
+      - MEILISEARCH_URL=http://meilisearch:7700
+      - MEILISEARCH_MASTER_KEY=${MEILISEARCH_MASTER_KEY}
+      - WASABI_ENDPOINT=${WASABI_ENDPOINT}
+      - WASABI_ACCESS_KEY=${WASABI_ACCESS_KEY}
+      - WASABI_SECRET_KEY=${WASABI_SECRET_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MODEL_NAME=${MODEL_NAME}
+      - BUCKET_NAME=${BUCKET_NAME}
+    depends_on:
+      - meilisearch
+    volumes:
+      - ./.env:/app/.env
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=${MEILISEARCH_MASTER_KEY}
+    volumes:
+      - meilisearch-data:/meili_data
+
+volumes:
+  meilisearch-data:
