@@ -34,6 +34,5 @@ ENV OPENAI_API_BASE=http://llm:8000/v1  # Or external URL
 ENV OPENAI_API_KEY=your_openai_api_key
 ENV MODEL_NAME=mistralai/Mistral-7B-Instruct-v0.1
 ENV BUCKET_NAME=autopdf-bucket
-#REMOVE THIS: ENV GLPI_SESSION_TOKEN_KEY=glpi_session_token
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
