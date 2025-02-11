@@ -17,7 +17,6 @@ class Settings(BaseSettings):
     openai_api_key: str = Field(..., env="OPENAI_API_KEY")
     model_name: str = Field(..., env="MODEL_NAME")
     bucket_name: str = Field(..., env="BUCKET_NAME")
-    # REMOVE THIS LINE: glpi_session_token_key: str = Field(..., env="GLPI_SESSION_TOKEN_KEY")
     max_rag_iterations: int = 3
 
 settings = Settings()
