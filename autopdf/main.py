@@ -12,51 +12,41 @@ from datetime import datetime
 
 app = FastAPI()
 
-# Initialize GLPI client (which now handles session)
+# Initialize GLPI client
 glpi_client = GLPIClient()
 
-# Initialize agents (same as before)
+# Initialize agents
 data_extractor_agent = DataExtractorAgent(glpi_client)
 data_processor_agent = DataProcessorAgent()
 query_handler_agent = QueryHandlerAgent()
 pdf_generator_agent = PDFGeneratorAgent()
 search_indexer_agent = SearchIndexerAgent()
 
-def run_autopdf(incident_id: int, update_solution : bool = False) -> str: # Modified function definition
-    """Runs the AutoPDF workflow for a given incident ID.
-
-    Args:
-        incident_id: The ID of the GLPI incident.
-        update_solution: True, if solution need to update.
-    Returns:
-        A confirmation message.
-    """
-    # Define tasks (mostly the same, but with adjustments)
+def run_autopdf(incident_id: int, update_solution : bool = False) -> str:
+    """Runs the AutoPDF workflow for a given incident ID."""
     extract_incident_task = Task(
         description=f"Extract details for GLPI incident ID {incident_id}",
         agent=data_extractor_agent,
         tools=[data_extractor_agent.get_glpi_incident_details],
         expected_output="Raw data of the incident",
     )
-    # ... (other extraction tasks, same as before) ...
     extract_solution_task = Task(
         description=f"Extract solution for GLPI incident ID {incident_id}",
         agent=data_extractor_agent,
         tools=[data_extractor_agent.get_glpi_ticket_solution],
         expected_output="Raw solution data",
-        context=[extract_incident_task], # Add dependency
+        context=[extract_incident_task],
     )
     extract_tasks_task = Task(
         description=f"Extract tasks for GLPI incident ID {incident_id}",
         agent=data_extractor_agent,
         tools=[data_extractor_agent.get_glpi_ticket_tasks],
         expected_output="Raw tasks data",
-        context=[extract_incident_task], # Add dependency
+        context=[extract_incident_task],
     )
-    # For simplicity, we use a default value.  In a real implementation, get this from GLPI.
-    document_id = 12345
+    document_id = 12345  # TODO: Get this dynamically from GLPI
     extract_document_task = Task(
-        description=f"Extract content of document ID {document_id} from GLPI",
+        description=f"Extract content of document ID {document_id}",
         agent=data_extractor_agent,
         tools=[data_extractor_agent.get_glpi_document_content],
         expected_output="Raw document content",
@@ -67,9 +57,8 @@ def run_autopdf(incident_id: int, update_solution : bool = False) -> str: # Modi
         agent=data_processor_agent,
         expected_output="Cleaned and structured data",
         context=[extract_incident_task, extract_document_task, extract_solution_task, extract_tasks_task],
-        function=data_processor_agent.process_glpi_data  # Pass results as args
+        function=data_processor_agent.process_glpi_data
     )
-
     generate_content_task = Task(
         description="Generate report content using RAG",
         agent=query_handler_agent,
@@ -77,7 +66,6 @@ def run_autopdf(incident_id: int, update_solution : bool = False) -> str: # Modi
         context=[process_data_task],
         function=query_handler_agent.run_rag
     )
-
     create_pdf_task = Task(
         description="Create a PDF report",
         agent=pdf_generator_agent,
@@ -86,7 +74,6 @@ def run_autopdf(incident_id: int, update_solution : bool = False) -> str: # Modi
         function=lambda x: pdf_generator_agent.create_pdf_from_text_tool_method(content=x, title=f"Incident Report - {incident_id}"),
         context=[generate_content_task]
     )
-
     index_pdf_task = Task(
         description="Store PDF and index",
         agent=search_indexer_agent,
@@ -94,9 +81,7 @@ def run_autopdf(incident_id: int, update_solution : bool = False) -> str: # Modi
         context=[create_pdf_task, process_data_task],
         function=search_indexer_agent.index_and_store_pdf
     )
-    # NO SOLUTION UPDATE TASK (YET) - See below
 
-    # Define the crew
     crew = Crew(
         agents=[
             data_extractor_agent,
@@ -119,13 +104,10 @@ def run_autopdf(incident_id: int, update_solution : bool = False) -> str: # Modi
         verbose=2
     )
 
-    # Run the crew and get the result.
     try:
         result = crew.kickoff()
-
-        # Update solution if needed and requested.  This happens *AFTER* the PDF is generated.
         if update_solution:
-            solution_update_result = glpi_client.update_ticket_solution(incident_id, result['generated_content']) # Assuming result contains generated_content
+            solution_update_result = glpi_client.update_ticket_solution(incident_id, result['generated_content'])
             if solution_update_result:
                  print(f"Solution for incident {incident_id} updated successfully.")
             else:
@@ -136,27 +118,24 @@ def run_autopdf(incident_id: int, update_solution : bool = False) -> str: # Modi
         glpi_client.close_session()
 
 
-@app.post("/webhook")  # NEW WEBHOOK ENDPOINT
+@app.post("/webhook")
 async def glpi_webhook(request: Request):
     """Handles incoming webhooks from GLPI."""
     try:
-        # Get the raw body as bytes, decode, then parse as JSON.
         body = await request.body()
         data = json.loads(body.decode())
 
-        # Basic validation (you should enhance this!)
         if not isinstance(data, list):
             raise HTTPException(status_code=400, detail="Invalid webhook payload format")
 
-        for event in data:  # GLPI sends webhooks in batches
+        for event in data:
             if 'event' not in event or 'itemtype' not in event or 'items_id' not in event:
                 raise HTTPException(status_code=400, detail="Missing required fields in event")
 
             if event['itemtype'] == 'Ticket':
-                incident_id = int(event['items_id'])  # Convert to integer
+                incident_id = int(event['items_id'])
 
-                if event['event'] in ('add', 'update'): # GLPI event names
-                     # Trigger the workflow.  Pass update_solution=True if it's an update
+                if event['event'] in ('add', 'update'):
                     print("*"*50)
                     print(f"Received event: {event['event']} for Ticket ID: {incident_id}")
                     print("*"*50)
@@ -172,7 +151,7 @@ async def glpi_webhook(request: Request):
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
     except Exception as e:
-        print(f"Error in webhook: {e}")  # Log the full exception
+        print(f"Error in webhook: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
 
 
