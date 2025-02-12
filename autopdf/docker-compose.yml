@@ -1,36 +1,25 @@
 version: '3.8'
-
 services:
   autopdf:
     build: .
     ports:
       - "8000:8000"
+    # IMPORTANT: Use a secrets management solution!
+    #  These are just placeholders. DO NOT hardcode your credentials.
+    #  Provide them via environment variables at runtime, e.g., using
+    #  docker run -e GLPI_URL=... -e GLPI_APP_TOKEN=... ...
     environment:
-      - GLPI_URL=${GLPI_URL}
-      - GLPI_APP_TOKEN=${GLPI_APP_TOKEN}
-      - GLPI_USER_TOKEN=${GLPI_USER_TOKEN}
-      - MEILISEARCH_URL=http://meilisearch:7700
-      - MEILISEARCH_MASTER_KEY=${MEILISEARCH_MASTER_KEY}
-      - WASABI_ENDPOINT=${WASABI_ENDPOINT}
-      - WASABI_ACCESS_KEY=${WASABI_ACCESS_KEY}
-      - WASABI_SECRET_KEY=${WASABI_SECRET_KEY}
-      - OPENAI_API_BASE=${OPENAI_API_BASE}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - MODEL_NAME=${MODEL_NAME}
-      - BUCKET_NAME=${BUCKET_NAME}
-    depends_on:
-      - meilisearch
-    volumes:
-      - ./.env:/app/.env
+      - GLPI_URL=${GLPI_URL}  # Or directly: your_glpi_url
+      - GLPI_APP_TOKEN=${GLPI_APP_TOKEN}  # Or directly: your_glpi_app_token
+      - GLPI_USER_TOKEN=${GLPI_USER_TOKEN} # Or directly: your_user_token
+      - MEILISEARCH_URL=${MEILISEARCH_URL}  # Or directly: your_meilisearch_url
+      - MEILISEARCH_MASTER_KEY=${MEILISEARCH_MASTER_KEY} # Or directly
+      - WASABI_ENDPOINT=${WASABI_ENDPOINT} # Or directly
+      - WASABI_ACCESS_KEY=${WASABI_ACCESS_KEY} # Or directly
+      - WASABI_SECRET_KEY=${WASABI_SECRET_KEY} # Or directly
+      - OPENAI_API_BASE=${OPENAI_API_BASE} # Or directly
+      - OPENAI_API_KEY=${OPENAI_API_KEY} #Or directly
+      - MODEL_NAME=${MODEL_NAME} # Or directly
+      - BUCKET_NAME=${BUCKET_NAME} #Or directly
 
-  meilisearch:
-    image: getmeili/meilisearch:latest
-    ports:
-      - "7700:7700"
-    environment:
-      - MEILI_MASTER_KEY=${MEILISEARCH_MASTER_KEY}
-    volumes:
-      - meilisearch-data:/meili_data
-
-volumes:
-  meilisearch-data:
+    # No depends_on or volumes for Meilisearch
