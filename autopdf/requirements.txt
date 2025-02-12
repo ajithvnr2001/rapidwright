@@ -12,3 +12,4 @@ pydantic
 unstructured[all-docs]
 lxml
 beautifulsoup4
+pydantic-settings
