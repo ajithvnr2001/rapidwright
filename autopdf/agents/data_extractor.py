@@ -2,6 +2,7 @@ from crewai import Agent
 from core.glpi import GLPIClient
 from langchain.tools import tool
 from typing import Optional
+from typing import Dict, ClassVar
 
 class DataExtractorAgent(Agent):
     def __init__(self, glpi_client: GLPIClient):
