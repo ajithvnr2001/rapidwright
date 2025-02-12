@@ -1,8 +1,7 @@
 from crewai import Agent
 from core.glpi import GLPIClient
 from langchain.tools import tool
-from typing import Optional
-from typing import Dict, ClassVar
+from typing import Optional, ClassVar  # Import ClassVar
 
 class DataExtractorAgent(Agent):
     def __init__(self, glpi_client: GLPIClient):
@@ -10,7 +9,7 @@ class DataExtractorAgent(Agent):
             role='Data Extractor',
             goal='Retrieve and validate raw data from GLPI',
             backstory="""Expert in extracting data from various sources,
-            especially GLPI. Resilient to API issues and data inconsistencies.""",
+            especially GLPI.  Resilient to API issues and data inconsistencies.""",
             tools=[self.get_glpi_incident_details, self.get_glpi_document_content,
                    self.get_glpi_ticket_solution, self.get_glpi_ticket_tasks],
             verbose=True,
@@ -23,17 +22,17 @@ class DataExtractorAgent(Agent):
         """Fetches details for a specific incident from GLPI."""
         try:
             incident = self.glpi_client.get_incident(incident_id)
-            return str(incident)
+            return str(incident)  # Return as string for CrewAI
         except Exception as e:
             print(f"Error in get_glpi_incident_details: {e}")
-            return ""
+            return ""  # Return empty string on error
 
     @tool
     def get_glpi_document_content(self, document_id: int) -> str:
         """Fetches the content of a document from GLPI."""
         try:
             document_content = self.glpi_client.get_document(document_id)
-            return str(document_content)
+            return str(document_content)  # Consistent string return
         except Exception as e:
             print(f"Error in get_glpi_document_content: {e}")
             return ""
