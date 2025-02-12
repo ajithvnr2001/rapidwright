@@ -5,6 +5,7 @@ import io
 import re
 from bs4 import BeautifulSoup
 from typing import List, Dict, Any
+from typing import Dict, ClassVar
 
 class DataProcessorAgent(Agent):
     def __init__(self):
