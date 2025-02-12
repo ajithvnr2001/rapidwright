@@ -1,5 +1,6 @@
 from crewai import Agent
 from graphs.rag_graph import rag_app
+from typing import Dict, ClassVar
 
 class QueryHandlerAgent(Agent):
     def __init__(self):
