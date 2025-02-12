@@ -6,6 +6,7 @@ import hashlib
 from langchain.tools import tool
 from typing import Dict, ClassVar  # Import ClassVar
 from datetime import datetime
+from typing import ClassVar
 
 meilisearch_client = MeilisearchClient()
 wasabi_client = WasabiClient()
