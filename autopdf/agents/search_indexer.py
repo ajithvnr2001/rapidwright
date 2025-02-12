@@ -4,9 +4,8 @@ from core.wasabi_client import WasabiClient
 from core.config import settings
 import hashlib
 from langchain.tools import tool
-from typing import Dict
+from typing import Dict, ClassVar  # Import ClassVar
 from datetime import datetime
-from typing import Dict, ClassVar
 
 meilisearch_client = MeilisearchClient()
 wasabi_client = WasabiClient()
@@ -19,7 +18,7 @@ class SearchIndexerAgent(Agent):
             goal='Store and index PDFs for search and versioning',
             backstory="""Expert in data storage, indexing, and version control.
             Stores PDFs in Wasabi and indexes them in Meilisearch.""",
-            tools=[],
+            tools=[],  # Uses core functions directly
             verbose=True,
             allow_delegation=False
         )
