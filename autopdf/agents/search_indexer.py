@@ -18,7 +18,7 @@ class SearchIndexerAgent(Agent):
             goal='Store and index PDFs for search and versioning',
             backstory="""Expert in data storage, indexing, and version control.
             Stores PDFs in Wasabi and indexes them in Meilisearch.""",
-            tools=[],  # Uses core functions directly
+            tools=[],
             verbose=True,
             allow_delegation=False
         )
