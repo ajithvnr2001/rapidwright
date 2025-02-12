@@ -1,6 +1,7 @@
 from crewai import Agent
 from core.pdf_utils import create_pdf_from_text, create_pdf_from_html
 from langchain.tools import tool
+from typing import Dict, ClassVar
 
 class PDFGeneratorAgent(Agent):
     def __init__(self):
