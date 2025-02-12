@@ -1,6 +1,7 @@
 from crewai import Agent
 from graphs.rag_graph import rag_app
 from typing import ClassVar  # Import ClassVar
+from typing import ClassVar
 
 class QueryHandlerAgent(Agent):
     def __init__(self):
